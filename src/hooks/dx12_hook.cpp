@@ -11,6 +11,7 @@
 #include <imgui_impl_win32.h>
 
 #include "input.h"
+#include "../game/world.h"
 #include "xinput_hook.h"
 #include "hdr_composite_shader.h"
 #include "../core/logger.h"
@@ -1032,6 +1033,7 @@ namespace trinity::hooks
     // untouched - under DLSS-G the native present is Streamline's read-only frame.
     static HRESULT WINAPI hkPresent(IDXGISwapChain3* swapChain, UINT syncInterval, UINT flags)
     {
+        trinity::game::World::TickSpeed();
         const bool drew = RenderOverlay(swapChain, !g_wrapperActive);
         const HRESULT hr = oPresent(swapChain, syncInterval, flags);
         PostPresentDeviceCheck(drew);

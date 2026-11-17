@@ -12,6 +12,7 @@
 #include "../game/dye.h"
 #include "../game/equipment.h"
 #include "../game/friendly.h"
+#include "../game/intro_skip.h"
 
 namespace trinity
 {
@@ -23,7 +24,7 @@ namespace trinity
         m_module = module;
         // Console is created lazily from the render path, so only the process
         // that actually presents the game gets one. Early logs buffer until then.
-        LOG("Trinity v%s initializing (built %s %s).", TRINITY_VERSION, __DATE__, __TIME__);
+        LOG(MOD_NAME " v%s initializing (built %s %s).", MOD_VERSION, __DATE__, __TIME__);
 
         // Restore last session's feature settings (Trinity.ini) before the
         // feature hooks install, so restored toggles apply from frame one.
@@ -34,6 +35,8 @@ namespace trinity
             LOG("MinHook initialization failed.");
             return;
         }
+
+        game::IntroSkip::Install();
 
         if (!hooks::InstallDX12Hooks())
         {

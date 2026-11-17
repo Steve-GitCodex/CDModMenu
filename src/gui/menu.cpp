@@ -21,6 +21,9 @@
 #include "../game/dye_data.h" // the game's dye families / preset shades (generated)
 #include "../game/equipment.h"
 #include "../game/friendly.h"
+#include "../game/storage_slots.h"
+#include "storage_sizes_page.h"
+#include "stat_tuning_page.h"
 
 namespace trinity::gui
 {
@@ -81,6 +84,9 @@ namespace trinity::gui
                         ? "Refine your gear and socket abyss gears into it."
                         : "Refine and socket your gear. Load into the world first.");
 
+        ui::Submenu("Stat Tuning", "stattune",
+                    "Health / Stamina / Spirit: floor, regen and Can't Die.");
+
         bool changed = false;
         changed |= ui::Toggle("God Mode", &st.godMode,
                    game::Player::Ready()
@@ -102,10 +108,25 @@ namespace trinity::gui
                         game::Friendly::Ready()
                             ? "Gifting NPCs or feeding animals builds trust faster."
                             : "Gifting NPCs or feeding animals builds trust faster. Unavailable right now.");
-        changed |= ui::FloatOption("Outgoing Damage", &st.dmgOutMult, 0.0f, 20.0f, 0.25f, 1.0f, "%.2fx",
-                        "Adjusts how much damage you deal.");
-        changed |= ui::FloatOption("Incoming Damage", &st.dmgInMult, 0.0f, 10.0f, 0.25f, 1.0f, "%.2fx",
-                        "Adjusts how much damage you take.");
+        changed |= ui::Toggle("One-Hit Kill", &st.oneHitKill,
+                        "Enemies die in one hit. Overrides Outgoing Damage while on.");
+        static const char* const kDmgModes[] = { "Multiplier", "Fixed per hit" };
+        changed |= ui::Combo("Outgoing Mode", &st.dmgOutMode, kDmgModes, 2,
+                        "Multiplier scales every hit you deal. Fixed per hit makes every hit deal exactly the amount below.");
+        if (st.dmgOutMode == 0)
+            changed |= ui::FloatOption("Outgoing Damage", &st.dmgOutMult, 0.0f, 20.0f, 0.25f, 1.0f, "%.2fx",
+                            "Adjusts how much damage you deal.");
+        else
+            changed |= ui::IntOption("Outgoing Damage per Hit", &st.dmgOutFixed, 0, 10000000, game::StorageSlots::Step() * 100, 50000,
+                            "Every hit you land deals exactly this much. For scale: your own health is a few hundred thousand.");
+        changed |= ui::Combo("Incoming Mode", &st.dmgInMode, kDmgModes, 2,
+                        "Multiplier scales every hit you take. Fixed per hit makes every hit take exactly the amount below.");
+        if (st.dmgInMode == 0)
+            changed |= ui::FloatOption("Incoming Damage", &st.dmgInMult, 0.0f, 10.0f, 0.25f, 1.0f, "%.2fx",
+                            "Adjusts how much damage you take.");
+        else
+            changed |= ui::IntOption("Incoming Damage per Hit", &st.dmgInFixed, 0, 10000000, game::StorageSlots::Step() * 100, 10000,
+                            "Every hit you take deals exactly this much (0 = no damage). Your health is a few hundred thousand.");
 
         if (changed && st.autoSave)
             Settings::Save();
@@ -934,18 +955,36 @@ namespace trinity::gui
 
         ui::Submenu("Add Item", "invadd", "Add any item in the game to your inventory.");
         ui::Submenu("Item Editor", "invedit", "Browse and edit what you're carrying.");
+        ui::Submenu("Storage Sizes", "invsizes", "Set a different slot count for each storage (backpack, private storage...).");
 
-        bool changed = false;
-        if (ui::ToggleInt("Slot Size", &st.invSlotSize, &st.invSlotSizeVal,
-                          1, 9999, 10, 2000,
-                          "Sets every storage's slot count to this number."))
+        bool changed = ui::Combo("Step", &st.invStepIdx, game::StorageSlots::kStepNames, 4,
+                                 "How much Left/Right changes the numbers below. Hold the key for x10.");
+        if (ui::ToggleInt("Slot Size (all storages)", &st.invSlotSize, &st.invSlotSizeVal,
+                          1, 9999, game::StorageSlots::Step(), 2000,
+                          "Same slot count for every storage. Storages set in Storage Sizes use their own number instead."))
             changed = true;
-        if (ui::ToggleInt("Max Stack Size", &st.invStackSize, &st.invStackSizeVal,
-                          1, 999999999, 1000, 999999,
-                          "Sets every item's max stack size to this number."))
+        static const char* const kStackModes[] = {"Fixed number", "Multiplier"};
+        int stackMode = st.invStackMultMode ? 1 : 0;
+        if (ui::Combo("Stack Mode", &stackMode, kStackModes, 2,
+                      "Fixed: every stackable item gets the same max. Multiplier: each item's own max is multiplied."))
+        {
+            st.invStackMultMode = stackMode == 1;
+            changed = true;
+        }
+        if (st.invStackMultMode)
+        {
+            if (ui::Toggle("Max Stack Size", &st.invStackSize,
+                           "Multiplies the max stack of items that already stack. Gear and unique items are never changed."))
+                changed = true;
+            if (ui::IntOption("Stack Multiplier", &st.invStackMult, 2, 1000, 1, 10, "x times each item's normal max stack."))
+                changed = true;
+        }
+        else if (ui::ToggleInt("Max Stack Size", &st.invStackSize, &st.invStackSizeVal,
+                               1, 999999999, game::StorageSlots::Step(), 999999,
+                               "Sets the max stack of items that already stack. Gear and unique items are never changed."))
             changed = true;
 
-        if (changed && st.autoSave)
+        if (changed)
             Settings::Save();
 
         ui::End();
@@ -1642,6 +1681,12 @@ namespace trinity::gui
         ui::Submenu("Keybinds", "keybinds",
                    "Set the keyboard and controller binds for opening the menu and Free Flight.");
 
+        if (ui::ToggleFloat("Hold F6 to Fast-Forward", &st.turboHold, &st.turboMult, 1.0f, 10.0f, 1.0f, 8.0f, "%.0fx",
+                            "Hold F6 during cutscenes and loading clips to play them this many times faster. Does nothing during normal gameplay."))
+            save = true;
+        if (ui::Toggle("Skip Intro Videos", &st.skipIntroVideos,
+                       "Skips the startup videos. Title-screen background loops still play. Takes effect next launch."))
+            save = true;
         save |= ui::Toggle("Show FPS Counter", &st.showFps, "Shows your FPS in the corner of the screen.") && st.autoSave;
 
         if (ui::Toggle("Auto Save Features", &st.autoSave,
@@ -1723,6 +1768,8 @@ namespace trinity::gui
         else if (!strcmp(cur, "invstore")) RenderInventoryStorage();
         else if (!strcmp(cur, "invcat"))   RenderInventoryCat();
         else if (!strcmp(cur, "invadd"))    RenderInventoryAdd();
+        else if (!strcmp(cur, "invsizes"))  RenderStorageSizes();
+        else if (!strcmp(cur, "stattune"))  RenderStatTuning();
         else if (!strcmp(cur, "invaddcat")) RenderInventoryAddCat();
         else                              RenderPlayer();
     }

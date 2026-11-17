@@ -246,7 +246,7 @@ namespace trinity::game
         // (captured the first time it was ever touched this session), so the
         // toggle behaves like every other one in the mod rather than leaving
         // anything permanently stomped.
-        static bool SetAllMaxStackSizes(bool enable, int64_t value);
+        static bool SetAllMaxStackSizes(bool enable, int64_t value, bool multiply = false);
         static bool SetAllSlotSizes(bool enable, int value);
 
         // Game-thread upkeep for the two overrides above: applies (or

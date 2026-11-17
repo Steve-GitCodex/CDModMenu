@@ -1,6 +1,7 @@
 #include "settings.h"
 
 #include <Windows.h>
+#include "core/version.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -29,7 +30,7 @@ namespace trinity
             return false;
 
         const size_t left = cap - static_cast<size_t>(slash + 1 - buf);
-        return snprintf(slash + 1, left, "Trinity.ini%s", suffix) < static_cast<int>(left);
+        return snprintf(slash + 1, left, MOD_NAME ".ini%s", suffix) < static_cast<int>(left);
     }
 
     static float ClampF(float v, float lo, float hi)
@@ -77,6 +78,10 @@ namespace trinity
             else if (!strcmp(key, "infSpirit"))     vals.infSpirit     = atoi(val) != 0;
             else if (!strcmp(key, "dmgOutMult"))    vals.dmgOutMult    = strtof(val, nullptr);
             else if (!strcmp(key, "dmgInMult"))     vals.dmgInMult     = strtof(val, nullptr);
+            else if (!strcmp(key, "dmgOutMode"))    vals.dmgOutMode    = atoi(val);
+            else if (!strcmp(key, "dmgInMode"))     vals.dmgInMode     = atoi(val);
+            else if (!strcmp(key, "dmgOutFixed"))   vals.dmgOutFixed   = atoi(val);
+            else if (!strcmp(key, "dmgInFixed"))    vals.dmgInFixed    = atoi(val);
             else if (!strcmp(key, "gameSpeed"))     vals.gameSpeed     = atoi(val) != 0;
             else if (!strcmp(key, "gameSpeedMult")) vals.gameSpeedMult = strtof(val, nullptr);
             else if (!strcmp(key, "timeFrozen"))    vals.timeFrozen    = atoi(val) != 0;
@@ -92,7 +97,36 @@ namespace trinity
             else if (!strcmp(key, "invSlotSizeVal")) vals.invSlotSizeVal = atoi(val);
             else if (!strcmp(key, "invStackSize"))    vals.invStackSize    = atoi(val) != 0;
             else if (!strcmp(key, "invStackSizeVal")) vals.invStackSizeVal = atoi(val);
+            else if (!strcmp(key, "invStackMultMode")) vals.invStackMultMode = atoi(val) != 0;
+            else if (!strcmp(key, "invStackMult"))     vals.invStackMult     = atoi(val);
+            else if (!strcmp(key, "invStepIdx"))       vals.invStepIdx       = atoi(val);
+            else if (!strcmp(key, "invStorage") && vals.invStorageSlotCount < State::kMaxStorageSlots)
+            {
+                State::StorageSlots& e = vals.invStorageSlots[vals.invStorageSlotCount];
+                int on = 0;
+                if (sscanf(val, "%47[^,],%d,%d", e.key, &on, &e.value) == 3)
+                {
+                    e.on    = on != 0;
+                    e.value = ClampI(e.value, 1, 9999);
+                    ++vals.invStorageSlotCount;
+                }
+            }
             else if (!strcmp(key, "showFps"))       vals.showFps       = atoi(val) != 0;
+            else if (!strcmp(key, "cannotDie"))    { int on = 0, pct = 1;
+                                                       if (sscanf(val, "%d,%d", &on, &pct) == 2) { vals.cannotDie = on != 0; vals.cannotDiePct = ClampI(pct, 1, 10); } }
+            else if (!strcmp(key, "skipIntroVideos")) vals.skipIntroVideos = atoi(val) != 0;
+            else if (!strcmp(key, "turboHold"))       vals.turboHold       = atoi(val) != 0;
+            else if (!strcmp(key, "turboMult"))       vals.turboMult       = strtof(val, nullptr);
+            else if (!strcmp(key, "statTune"))
+            {
+                int i = 0, fo = 0, fp = 0, ro = 0, rp = 0, mo = 0, mp = 0, rs = 30;
+                const int got = sscanf(val, "%d,%d,%d,%d,%d,%d,%d,%d", &i, &fo, &fp, &ro, &rp, &mo, &mp, &rs);
+                if (got == 6) rs = mo;
+                if (got >= 6 &&
+                    i >= 0 && i < State::kStatTuneCount)
+                    vals.statTune[i] = { fo != 0, ClampI(fp, 1, 100), ro != 0, ClampI(rp, 1, 100),
+                                         ClampI(rs, 1, 100) };
+            }
         }
         fclose(f);
 
@@ -114,6 +148,25 @@ namespace trinity
         st.flyUpPadMask   = vals.flyUpPadMask   & 0x3FFFF;
         st.flyDownPadMask = vals.flyDownPadMask & 0x3FFFF;
 
+        st.invSlotSize      = vals.invSlotSize;
+        st.invSlotSizeVal   = ClampI(vals.invSlotSizeVal, 1, 9999);
+        st.invStackSize     = vals.invStackSize;
+        st.invStackSizeVal  = ClampI(vals.invStackSizeVal, 1, 999999999);
+        st.invStackMultMode = vals.invStackMultMode;
+        st.invStackMult     = ClampI(vals.invStackMult, 2, 1000);
+        st.invStepIdx       = ClampI(vals.invStepIdx, 0, 3);
+        st.invStorageSlotCount = vals.invStorageSlotCount;
+        for (int i = 0; i < vals.invStorageSlotCount; ++i)
+            st.invStorageSlots[i] = vals.invStorageSlots[i];
+
+        for (int i = 0; i < State::kStatTuneCount; ++i)
+            st.statTune[i] = vals.statTune[i];
+        st.skipIntroVideos = vals.skipIntroVideos;
+        st.turboHold       = vals.turboHold;
+        st.turboMult       = ClampF(vals.turboMult, 1.0f, 10.0f);
+        st.cannotDie    = vals.cannotDie;
+        st.cannotDiePct = vals.cannotDiePct;
+
         if (!st.autoSave)
             return; // remembered the preference, but features start clean
 
@@ -124,6 +177,10 @@ namespace trinity
         st.infSpirit     = vals.infSpirit;
         st.dmgOutMult    = ClampF(vals.dmgOutMult, 0.0f, 20.0f);
         st.dmgInMult     = ClampF(vals.dmgInMult, 0.0f, 10.0f);
+        st.dmgOutMode    = ClampI(vals.dmgOutMode, 0, 1);
+        st.dmgInMode     = ClampI(vals.dmgInMode, 0, 1);
+        st.dmgOutFixed   = ClampI(vals.dmgOutFixed, 0, 10000000);
+        st.dmgInFixed    = ClampI(vals.dmgInFixed, 0, 10000000);
         st.gameSpeed     = vals.gameSpeed;
         st.gameSpeedMult = ClampF(vals.gameSpeedMult, 0.1f, 5.0f);
         st.timeFrozen    = vals.timeFrozen;
@@ -135,12 +192,8 @@ namespace trinity
         st.flightSpeed   = ClampF(vals.flightSpeed, 1.0f, 40.0f);
         st.trustMult     = vals.trustMult;
         st.trustMultVal  = ClampF(vals.trustMultVal, 1.0f, 25.0f);
-        st.invSlotSize     = vals.invSlotSize;
-        st.invSlotSizeVal  = ClampI(vals.invSlotSizeVal, 1, 9999);
-        st.invStackSize    = vals.invStackSize;
-        st.invStackSizeVal = ClampI(vals.invStackSizeVal, 1, 999999999);
         st.showFps       = vals.showFps;
-        LOG_OK("Trinity.ini loaded - restored feature settings from last session.");
+        LOG_OK(MOD_NAME ".ini loaded - restored feature settings from last session.");
     }
 
     void Settings::ClaimOwnership()
@@ -200,6 +253,8 @@ namespace trinity
                 "invSlotSizeVal=%d\n"
                 "invStackSize=%d\n"
                 "invStackSizeVal=%d\n"
+                "invStackMultMode=%d\n"
+                "invStackMult=%d\n"
                 "showFps=%d\n",
                 st.openKeyVk,
                 st.openPadMask,
@@ -228,7 +283,25 @@ namespace trinity
                 st.invSlotSizeVal,
                 st.invStackSize ? 1 : 0,
                 st.invStackSizeVal,
+                st.invStackMultMode ? 1 : 0,
+                st.invStackMult,
                 st.showFps ? 1 : 0);
+        fprintf(f, "invStepIdx=%d\n", st.invStepIdx);
+        for (int i = 0; i < st.invStorageSlotCount; ++i)
+        {
+            const State::StorageSlots& e = st.invStorageSlots[i];
+            fprintf(f, "invStorage=%s,%d,%d\n", e.key, e.on ? 1 : 0, e.value);
+        }
+        fprintf(f, "dmgOutMode=%d\ndmgInMode=%d\ndmgOutFixed=%d\ndmgInFixed=%d\n", st.dmgOutMode, st.dmgInMode, st.dmgOutFixed, st.dmgInFixed);
+        fprintf(f, "turboHold=%d\nturboMult=%.2f\n", st.turboHold ? 1 : 0, st.turboMult);
+        fprintf(f, "skipIntroVideos=%d\n", st.skipIntroVideos ? 1 : 0);
+        fprintf(f, "cannotDie=%d,%d\n", st.cannotDie ? 1 : 0, st.cannotDiePct);
+        for (int i = 0; i < State::kStatTuneCount; ++i)
+        {
+            const State::StatTune& t = st.statTune[i];
+            fprintf(f, "statTune=%d,%d,%d,%d,%d,%d\n", i, t.floorOn ? 1 : 0, t.floorPct,
+                    t.regenOn ? 1 : 0, t.regenPct, t.regenStartPct);
+        }
         const bool ok = fflush(f) == 0;
         fclose(f);
 
@@ -251,6 +324,10 @@ namespace trinity
         st.infSpirit     = def.infSpirit;
         st.dmgOutMult    = def.dmgOutMult;
         st.dmgInMult     = def.dmgInMult;
+        st.dmgOutMode    = def.dmgOutMode;
+        st.dmgInMode     = def.dmgInMode;
+        st.dmgOutFixed   = def.dmgOutFixed;
+        st.dmgInFixed    = def.dmgInFixed;
         st.gameSpeed     = def.gameSpeed;
         st.gameSpeedMult = def.gameSpeedMult;
         st.timeFrozen    = def.timeFrozen;
@@ -266,7 +343,14 @@ namespace trinity
         st.invSlotSizeVal  = def.invSlotSizeVal;
         st.invStackSize    = def.invStackSize;
         st.invStackSizeVal = def.invStackSizeVal;
+        st.invStackMultMode = def.invStackMultMode;
+        st.invStackMult     = def.invStackMult;
         st.showFps       = def.showFps;
+        st.oneHitKill    = def.oneHitKill;
+        st.cannotDie     = def.cannotDie;
+        st.cannotDiePct  = def.cannotDiePct;
+        for (int i = 0; i < State::kStatTuneCount; ++i)
+            st.statTune[i] = def.statTune[i];
     }
 
     void Settings::ResetBinds()

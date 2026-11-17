@@ -54,6 +54,7 @@ namespace trinity::game
         // Driven by the movement-update tick (see teleport.cpp), same as the
         // player resolve.
         static void Tick();
+        static void TickSpeed();
 
         // True once the Game Speed globals resolved (the feature is available).
         static bool Ready();

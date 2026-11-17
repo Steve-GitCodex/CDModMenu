@@ -564,10 +564,10 @@ namespace trinity::ui
 
         const float tsz = g_fontTitle->FontSize;
         const ImVec2 tp(g_x + 16.0f * s, g_y + (brandH - tsz) * 0.5f);
-        dl->AddText(g_fontTitle, tsz, ImVec2(tp.x + 2.0f * s, tp.y + 2.0f * s), theme::Shadow, "TRINITY");
-        dl->AddText(g_fontTitle, tsz, tp, theme::TextBright, "TRINITY");
+        dl->AddText(g_fontTitle, tsz, ImVec2(tp.x + 2.0f * s, tp.y + 2.0f * s), theme::Shadow, MOD_NAME_UPPER);
+        dl->AddText(g_fontTitle, tsz, tp, theme::TextBright, MOD_NAME_UPPER);
 
-        const char*  ver = "v" TRINITY_VERSION;
+        const char*  ver = "v" MOD_VERSION;
         const float  vz  = g_fontBody->FontSize * 0.78f;
         const ImVec2 vs  = g_fontBody->CalcTextSizeA(vz, FLT_MAX, 0.0f, ver);
         dl->AddText(g_fontBody, vz,
@@ -645,7 +645,7 @@ namespace trinity::ui
             // Crumb parts: tab name, then each pushed submenu's title.
             const char* parts[8];
             int n = 0;
-            parts[n++] = (g_tabCount > 0) ? g_tabNames[g_tab] : "TRINITY";
+            parts[n++] = (g_tabCount > 0) ? g_tabNames[g_tab] : MOD_NAME_UPPER;
             for (const StackEntry& e : g_stack)
                 if (n < 8) parts[n++] = e.title.c_str();
             if (subtitleOverride && n > 1)

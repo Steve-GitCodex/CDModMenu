@@ -13,6 +13,7 @@
 #include "../mem/hooks.h"
 #include "../core/logger.h"
 #include "../core/state.h"
+#include "stat_tuning.h"
 
 namespace trinity::game
 {
@@ -262,7 +263,8 @@ namespace trinity::game
         bool AnyStatFeatureActive(const State& st)
         {
             return st.godMode || st.infStamina || st.infSpirit ||
-                   st.dmgInMult != 1.0f || st.dmgOutMult != 1.0f;
+                   st.dmgInMult != 1.0f || st.dmgOutMult != 1.0f || st.dmgOutMode != 0 || st.dmgInMode != 0 ||
+                   StatTuning::NeedsTick(st);
         }
 
         void TickResolveSelf()
@@ -359,12 +361,20 @@ namespace trinity::game
         int64_t __fastcall hkStatCommit(void* entry, int64_t time, int64_t target, uint16_t flag)
         {
             const uintptr_t e = reinterpret_cast<uintptr_t>(entry);
+            if (InSet(g_stamEntries, kMaxStatEntries, e))
+                target = StatTuning::AdjustTarget(StatTuning::Stamina, e, time, target);
+            else if (InSet(g_spiritEntries, kMaxStatEntries, e))
+                target = StatTuning::AdjustTarget(StatTuning::Spirit, e, time, target);
             const int64_t result = oStatCommit(entry, time, target, flag);
 
             const State& st = State::Get();
             if (st.godMode    && InSet(g_hpEntries,     kMaxPlayers,     e)) PinEntry(e);
             if (st.infStamina && InSet(g_stamEntries,   kMaxStatEntries, e)) PinEntry(e);
             if (st.infSpirit  && InSet(g_spiritEntries, kMaxStatEntries, e)) PinEntry(e);
+
+            if      (InSet(g_hpEntries,     kMaxPlayers,     e)) StatTuning::OnCommit(StatTuning::Health, e);
+            else if (InSet(g_stamEntries,   kMaxStatEntries, e)) StatTuning::OnCommit(StatTuning::Stamina, e);
+            else if (InSet(g_spiritEntries, kMaxStatEntries, e)) StatTuning::OnCommit(StatTuning::Spirit, e);
 
             return result;
         }
@@ -375,6 +385,8 @@ namespace trinity::game
         // damage, otherwise if the attacker actor behind sourceCtx is any tracked
         // player's actor it is outgoing. Anything else (NPC vs NPC, scripted
         // drains with no source) passes through untouched.
+        constexpr float kOneHitKillMult = 100000.0f;
+
         int64_t ScaleDamage(uintptr_t targetOwner, uintptr_t sourceCtx, int64_t delta)
         {
             const State& st = State::Get();
@@ -382,6 +394,7 @@ namespace trinity::game
             float mult = 1.0f;
             if (InSet(g_targetOwners, kMaxPlayers, targetOwner))
             {
+                if (st.dmgInMode == 1) return -static_cast<int64_t>(st.dmgInFixed);
                 mult = st.dmgInMult;
             }
             else
@@ -390,7 +403,8 @@ namespace trinity::game
                 if (!Read64(sourceCtx + kOff_Owner_Actor, &actor) ||
                     !InSet(g_actors, kMaxPlayers, static_cast<uintptr_t>(actor)))
                     return delta;
-                mult = st.dmgOutMult;
+                if (!st.oneHitKill && st.dmgOutMode == 1) return -static_cast<int64_t>(st.dmgOutFixed);
+                mult = st.oneHitKill ? kOneHitKillMult : st.dmgOutMult;
             }
             if (mult == 1.0f) return delta;
 
@@ -456,12 +470,21 @@ namespace trinity::game
         const State& st = State::Get();
         if (!AnyStatFeatureActive(st))
         {
-            if (s_wasActive) { ClearPlayerSets(); s_wasActive = false; }
+            if (s_wasActive) { ClearPlayerSets(); StatTuning::Forget(); s_wasActive = false; }
             return;
         }
         s_wasActive = true;
 
         TickResolveSelf();
+
+        static ULONGLONG s_last = GetTickCount64();
+        const ULONGLONG now = GetTickCount64();
+        const double dt = static_cast<double>(now - s_last) / 1000.0;
+        s_last = now;
+        if (dt <= 0.0 || dt > 1.0) return;
+        StatTuning::Tick(StatTuning::Health,  g_hpEntries,     kMaxPlayers,     dt);
+        StatTuning::Tick(StatTuning::Stamina, g_stamEntries,   kMaxStatEntries, dt);
+        StatTuning::Tick(StatTuning::Spirit,  g_spiritEntries, kMaxStatEntries, dt);
     }
 
     void Player::Remove()

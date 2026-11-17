@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include "core/version.h"
 #include <cstdarg>
 #include <cstdio>
 #include <deque>
@@ -19,13 +20,16 @@ namespace trinity
 
         static void EnableConsole()
         {
+#ifdef NDEBUG
+            return;
+#endif
             std::lock_guard<std::mutex> lock(Mutex());
             if (s_console)
                 return;
 
             AllocConsole();
             freopen_s(&s_conFp, "CONOUT$", "w", stdout);
-            SetConsoleTitleA("Trinity");
+            SetConsoleTitleA(MOD_NAME);
             s_console = true;
 
             for (const auto& line : s_buffer)
@@ -88,7 +92,7 @@ namespace trinity
             SetConsoleTextAttribute(h, FOREGROUND_INTENSITY);
             std::printf("%s ", l.stamp.c_str());
             SetConsoleTextAttribute(h, FOREGROUND_RED | FOREGROUND_INTENSITY);
-            std::printf("Trinity ");
+            std::printf(MOD_NAME " ");
             SetConsoleTextAttribute(h, body);
             std::printf("%s\n", l.text.c_str());
             SetConsoleTextAttribute(h, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);

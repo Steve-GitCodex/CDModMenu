@@ -1,10 +1,15 @@
 #pragma once
 
-// Single source of truth for the mod version.
-// Keep the numeric components in sync with the string below; the Windows
-// VERSIONINFO resource (Trinity.rc) builds FILEVERSION/PRODUCTVERSION from them.
-#define TRINITY_VERSION_MAJOR 0
-#define TRINITY_VERSION_MINOR 13
-#define TRINITY_VERSION_PATCH 1
+#ifndef MOD_NAME
+#define MOD_NAME "CDModMenu"
+#endif
 
-#define TRINITY_VERSION "0.13.1"
+#ifndef MOD_NAME_UPPER
+#define MOD_NAME_UPPER "CDMODMENU"
+#endif
+
+#define MOD_VERSION_MAJOR 0
+#define MOD_VERSION_MINOR 1
+#define MOD_VERSION_PATCH 0
+
+#define MOD_VERSION "0.1.0"

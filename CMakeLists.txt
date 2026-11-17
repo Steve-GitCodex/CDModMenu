@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
-project(Trinity LANGUAGES CXX RC)
+project(CDModMenu LANGUAGES CXX RC)
+
+set(MOD_NAME "CDModMenu" CACHE STRING "Output name of the mod (.asi, .ini, console, menu title)")
+string(TOUPPER "${MOD_NAME}" MOD_NAME_UPPER)
 
 # ---------------------------------------------------------------------------
 # Trinity - internal ImGui mod menu for Crimson Desert (DirectX 12).
@@ -55,6 +58,7 @@ add_library(Trinity SHARED
     src/game/player.cpp
     src/game/teleport.cpp
     src/game/inventory.cpp
+    src/game/storage_slots.cpp
     src/game/world.cpp
     src/game/dye.cpp
     src/game/equipment.cpp
@@ -67,6 +71,11 @@ add_library(Trinity SHARED
     src/gui/widgets.cpp
     src/gui/icons.cpp
     src/gui/menu.cpp
+    src/gui/storage_sizes_page.cpp
+    src/gui/stat_tuning_page.cpp
+    src/game/stat_tuning.cpp
+    src/game/intro_skip.cpp
+    src/game/stat_drain.cpp
     src/Trinity.rc               # VERSIONINFO -> legitimate PE metadata for AV/ML scoring
 )
 
@@ -75,6 +84,10 @@ target_include_directories(Trinity PRIVATE src)
 target_include_directories(Trinity PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(Trinity PRIVATE imgui minhook d3d12 dxgi dwmapi imm32 xinput9_1_0)
 target_compile_definitions(Trinity PRIVATE
+    MOD_NAME="${MOD_NAME}"
+    MOD_NAME_UPPER="${MOD_NAME_UPPER}"
+    MOD_FILENAME="${MOD_NAME}.asi"
+    MOD_DESCRIPTION="${MOD_NAME} - Crimson Desert mod menu"
     WIN32_LEAN_AND_MEAN
     NOMINMAX
     _CRT_SECURE_NO_WARNINGS
@@ -84,7 +97,7 @@ target_compile_definitions(Trinity PRIVATE
 set_target_properties(Trinity PROPERTIES
     PREFIX ""
     SUFFIX ".asi"
-    OUTPUT_NAME "Trinity"
+    OUTPUT_NAME "${MOD_NAME}"
 )
 
 # --- Binary hardening ------------------------------------------------------

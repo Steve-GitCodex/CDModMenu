@@ -9,6 +9,7 @@
 #include <mutex>
 #include <vector>
 #include <algorithm>
+#include "storage_slots.h"
 
 #include <MinHook.h>
 
@@ -179,15 +180,19 @@ namespace trinity::game
         // current expansion once, so a later restore has the vanilla value.
         // A single lock hold covers the lookup and the insert, so a hook
         // refresh landing in between cannot duplicate the entry.
-        void CaptureOrigExpandOnce(uintptr_t bucket, uint16_t type)
+        void CaptureOrigExpandOnce(uintptr_t bucket, uint16_t type, uint16_t defSlots)
         {
             if (!g_capLockInit) return;
+            uint16_t field = 0, cap = 0;
+            Read16(bucket + kOff_InvBucket_ExpandSlots, &field);
+            Read16(bucket + kOff_InvBucket_MaxSlots, &cap);
+            const uint16_t fromCap = cap > defSlots ? static_cast<uint16_t>(cap - defSlots) : 0;
+            const uint16_t orig = field > fromCap ? field : fromCap;
             EnterCriticalSection(&g_capLock);
             bool have = false;
             for (const auto& e : g_origBucketCap)
                 if (e.bucket == bucket && e.type == type) { have = true; break; }
-            uint16_t orig = 0;
-            if (!have && Read16(bucket + kOff_InvBucket_ExpandSlots, &orig))
+            if (!have)
                 g_origBucketCap.push_back({ bucket, type, orig });
             LeaveCriticalSection(&g_capLock);
         }
@@ -202,10 +207,34 @@ namespace trinity::game
             EnterCriticalSection(&g_capLock);
             bool have = false;
             for (auto& e : g_origBucketCap)
-                if (e.bucket == bucket && e.type == type) { e.origExpand = vanilla; have = true; break; }
+                if (e.bucket == bucket && e.type == type)
+                {
+                    if (vanilla > e.origExpand) e.origExpand = vanilla;
+                    have = true;
+                    break;
+                }
             if (!have)
                 g_origBucketCap.push_back({ bucket, type, vanilla });
             LeaveCriticalSection(&g_capLock);
+        }
+
+        void EraseOrigExpand(uintptr_t bucket, uint16_t type)
+        {
+            if (!g_capLockInit) return;
+            EnterCriticalSection(&g_capLock);
+            g_origBucketCap.erase(std::remove_if(g_origBucketCap.begin(), g_origBucketCap.end(),
+                                                 [&](const BucketCap& e) { return e.bucket == bucket && e.type == type; }),
+                                  g_origBucketCap.end());
+            LeaveCriticalSection(&g_capLock);
+        }
+
+        bool AnyOrigExpandCaptured()
+        {
+            if (!g_capLockInit) return false;
+            EnterCriticalSection(&g_capLock);
+            const bool any = !g_origBucketCap.empty();
+            LeaveCriticalSection(&g_capLock);
+            return any;
         }
 
         // Edge-tracking for Tick(): only re-walk the (potentially thousands of
@@ -213,6 +242,8 @@ namespace trinity::game
         // the toggle currently wants - never every frame.
         bool    g_stackApplied  = false;
         int64_t g_stackAppliedVal = 0;
+        bool    g_stackAppliedMult = false;
+        constexpr int64_t kMaxStackCeiling = 999999999;
         bool    g_slotApplied     = false;
         int     g_slotAppliedVal  = 0;
 
@@ -989,14 +1020,29 @@ namespace trinity::game
             return 0;
         }
 
+        int SlotTargetForType(uint16_t type)
+        {
+            char key[48];
+            if (!StorageKeyForType(type, key, sizeof(key))) key[0] = 0;
+            return StorageSlots::TargetFor(key);
+        }
+
+        bool AnySlotTargetActive()
+        {
+            const State& st = State::Get();
+            if (st.invSlotSize) return true;
+            for (int i = 0; i < st.invStorageSlotCount; ++i)
+                if (st.invStorageSlots[i].on) return true;
+            return false;
+        }
+
         void* __fastcall hkSetExpandSlots(void* holder, int* outErr, void* a3,
                                           uint16_t type, uint16_t count)
         {
-            const State& st = State::Get();
-            if (st.invSlotSize)
+            if (const int target = SlotTargetForType(type); target > 0)
             {
                 uint16_t expand = 0;
-                if (OverrideExpandForType(type, st.invSlotSizeVal, &expand))
+                if (OverrideExpandForType(type, target, &expand))
                 {
                     const uintptr_t bucket = BucketByType(reinterpret_cast<uintptr_t>(holder), type);
                     if (bucket)
@@ -1540,7 +1586,7 @@ namespace trinity::game
         return g ? g->icon : "";
     }
 
-    bool Inventory::SetAllMaxStackSizes(bool enable, int64_t value)
+    bool Inventory::SetAllMaxStackSizes(bool enable, int64_t value, bool multiply)
     {
         if (!g_itemTableGlobal) return false;
         uintptr_t table = 0;
@@ -1574,7 +1620,10 @@ namespace trinity::game
                     g_origApplyCap[row]  = origCap;
                     g_stackCaptured[row] = true;
                 }
-                if (Write64(def + kOff_ItemDef_MaxStackCount, static_cast<uint64_t>(value)))
+                const int64_t orig = g_origMaxStack[row];
+                if (orig <= 1) continue;
+                const int64_t target = multiply ? std::min<int64_t>(orig * value, kMaxStackCeiling) : value;
+                if (Write64(def + kOff_ItemDef_MaxStackCount, static_cast<uint64_t>(std::max(target, orig))))
                     any = true;
                 Write8(def + kOff_ItemDef_ApplyMaxStackCap, 1);
             }
@@ -1635,7 +1684,8 @@ namespace trinity::game
                 if (!Read16(bucket + kOff_InvBucket_Type, &type) || type == kInvSlot_EmptyType) continue;
 
                 uint16_t expand = 0;
-                if (enable)
+                const int target = enable ? SlotTargetForType(type) : 0;
+                if (target > 0)
                 {
                     // `value` is a target CAP but the setter takes an EXPANSION,
                     // and the resulting cap is _defaultSlotCount + expansion.
@@ -1643,7 +1693,7 @@ namespace trinity::game
                     // A cap below the storage's default is not expressible -
                     // expansion 0 (the vanilla floor) is the closest we can get.
                     uint16_t defSlots = 0;
-                    if (!OverrideExpandForType(type, value, &expand, &defSlots)) continue;
+                    if (!OverrideExpandForType(type, target, &expand, &defSlots)) continue;
 
                     // Already where we want it - nothing to do. This is the
                     // steady state, and what keeps the per-tick re-apply cheap.
@@ -1659,7 +1709,7 @@ namespace trinity::game
                     // rebuild the fresh bucket carries the save's true
                     // expansion again, and hkSetExpandSlots refreshes the
                     // entry whenever the engine re-stamps its own value.
-                    CaptureOrigExpandOnce(bucket, type);
+                    CaptureOrigExpandOnce(bucket, type, defSlots);
                 }
                 else if (!FindOrigBucketCap(bucket, type, &expand))
                 {
@@ -1669,6 +1719,7 @@ namespace trinity::game
                 int err = 0;
                 oSetExpandSlots(reinterpret_cast<void*>(holder), &err, nullptr, type, expand);
                 if (err == 0) any = true;
+                if (target <= 0 && enable && err == 0) EraseOrigExpand(bucket, type);
             }
             return any;
         }
@@ -1726,12 +1777,15 @@ namespace trinity::game
 
         if (st.invStackSize)
         {
-            if (!g_stackApplied || g_stackAppliedVal != st.invStackSizeVal)
+            const bool mult = st.invStackMultMode;
+            const int64_t val = mult ? st.invStackMult : st.invStackSizeVal;
+            if (!g_stackApplied || g_stackAppliedVal != val || g_stackAppliedMult != mult)
             {
-                if (SetAllMaxStackSizes(true, st.invStackSizeVal))
+                if (SetAllMaxStackSizes(true, val, mult))
                 {
-                    g_stackApplied    = true;
-                    g_stackAppliedVal = st.invStackSizeVal;
+                    g_stackApplied     = true;
+                    g_stackAppliedVal  = val;
+                    g_stackAppliedMult = mult;
                 }
             }
         }
@@ -1747,18 +1801,10 @@ namespace trinity::game
         // never again. SetAllSlotSizes skips buckets that already match, so
         // re-driving it every tick costs a u16 read per bucket and makes the
         // feature survive reloads (and anything else that recomputes the cap).
-        if (st.invSlotSize)
+        if (AnySlotTargetActive() || AnyOrigExpandCaptured())
         {
-            if (SetAllSlotSizes(true, st.invSlotSizeVal))
-            {
-                g_slotApplied    = true;
-                g_slotAppliedVal = st.invSlotSizeVal;
-            }
-        }
-        else if (g_slotApplied)
-        {
-            if (SetAllSlotSizes(false, 0))
-                g_slotApplied = false;
+            if (SetAllSlotSizes(true, 0))
+                g_slotApplied = true;
         }
     }
 

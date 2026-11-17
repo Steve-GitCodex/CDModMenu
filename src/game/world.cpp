@@ -1,5 +1,7 @@
 #include "world.h"
 
+#include <atomic>
+
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -229,20 +231,23 @@ namespace trinity::game
         return ok;
     }
 
-    void World::Tick()
+    namespace { std::atomic<ULONGLONG> g_lastGameplayTick{ 0 }; }
+
+    void World::TickSpeed()
     {
         const State& st = State::Get();
-
+        const bool inCutscene = GetTickCount64() - g_lastGameplayTick.load(std::memory_order_relaxed) > 300;
         // Game Speed - only if its globals resolved; independent of the sun
         // freeze below, so a Game Speed signature drift never disables Freeze.
-        if ((g_flagAddr && g_valueAddr) && st.gameSpeed)
+        const bool turbo = st.turboHold && inCutscene && (GetAsyncKeyState(VK_F6) & 0x8000) != 0;
+        if ((g_flagAddr && g_valueAddr) && (st.gameSpeed || turbo))
         {
             // Forced frame delta = mult / 60: the engine's own fixed-timestep
             // reference is the 60-FPS step (1/60 s), so 1.00x reproduces it and
             // the multiplier scales sim time from there. Clamp both the factor
             // (to the slider's range) and the resulting delta (defensively, so a
             // bad value can never feed the sim an absurd timestep).
-            const float mult  = Clamp(st.gameSpeedMult, 0.1f, 5.0f);
+            const float mult  = turbo ? Clamp(st.turboMult, 1.0f, 10.0f) : Clamp(st.gameSpeedMult, 0.1f, 5.0f);
             const float delta = Clamp(mult / kGameSpeed_BaselineFps, 1.0e-5f, 1.0f);
 
             // Value first, then arm the flag, so the timing update never reads a
@@ -258,6 +263,14 @@ namespace trinity::game
             Write8(g_flagAddr, 0);
             g_applied = false;
         }
+
+    }
+
+    void World::Tick()
+    {
+        const State& st = State::Get();
+        g_lastGameplayTick.store(GetTickCount64(), std::memory_order_relaxed);
+        TickSpeed();
 
         // Freeze Time of Day: the field-time tick hook (hkFieldTimeTick) holds
         // the NUMERIC clock, but the visible SUN rides the render manager's own

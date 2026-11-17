@@ -44,10 +44,27 @@ namespace trinity
         bool infStamina = false;
         bool infSpirit  = false;
 
+        struct StatTune { bool floorOn; int floorPct; bool regenOn; int regenPct; int regenStartPct; };
+        static constexpr int kStatTuneCount = 3;
+        StatTune statTune[kStatTuneCount] = {
+            { false, 30, false, 10, 30 },
+            { false, 30, false, 10, 30 },
+            { false, 30, false, 10, 30 },
+        };
+        bool oneHitKill = false;
+        bool cannotDie = false;
+        bool hpMaxOn = false;
+        int  hpMaxPct = 200;
+        int  cannotDiePct = 1;
+
         // Battle-damage multipliers (player.cpp). Applied to the signed HP
         // delta at the damage-apply dispatcher; 1.0 = game behavior.
         float dmgOutMult = 1.0f; // player -> enemy
         float dmgInMult  = 1.0f; // enemy  -> player
+        int   dmgOutMode  = 0;
+        int   dmgInMode   = 0;
+        int   dmgOutFixed = 50000;
+        int   dmgInFixed  = 10000;
 
         // Movement features (teleport.cpp hkMoveUpdate). Scale the character
         // physics proxy's desired-velocity vector each movement tick: Super Run
@@ -110,9 +127,20 @@ namespace trinity
         int  invSlotSizeVal  = 2000;
         bool invStackSize    = false;
         int  invStackSizeVal = 999999;
+        bool invStackMultMode = false;
+        int  invStackMult     = 10;
+        int  invStepIdx       = 1;
+
+        struct StorageSlots { char key[48]; bool on; int value; };
+        static constexpr int kMaxStorageSlots = 32;
+        StorageSlots invStorageSlots[kMaxStorageSlots]{};
+        int          invStorageSlotCount = 0;
 
         // Overlay extras.
         bool showFps = false;
+        bool skipIntroVideos = true;
+        bool  turboHold = true;
+        float turboMult = 8.0f;
 
         // Persistence (settings.cpp). While on, every feature change is
         // written to Trinity.ini and restored on the next launch. The flag
