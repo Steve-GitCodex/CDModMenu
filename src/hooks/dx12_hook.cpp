@@ -24,7 +24,7 @@
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 
-namespace trinity::hooks
+namespace cdmm::hooks
 {
     // --- Original function pointers -----------------------------------------
     using Present_t         = HRESULT (WINAPI*)(IDXGISwapChain3*, UINT, UINT);
@@ -279,7 +279,7 @@ namespace trinity::hooks
                 D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clear,
                 IID_PPV_ARGS(&g_offscreenTex))))
             return false;
-        g_offscreenTex->SetName(L"TrinityOverlayOffscreen");
+        g_offscreenTex->SetName(L"CDModMenuOverlayOffscreen");
 
         D3D12_DESCRIPTOR_HEAP_DESC rtvDesc = {};
         rtvDesc.Type           = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -532,7 +532,7 @@ namespace trinity::hooks
     {
         // We only get here in the process that actually presents - open the
         // console now and flush the buffered startup logs into it, and claim
-        // Trinity.ini so the launcher's copy of the ASI can never save over us.
+        // CDModMenu.ini so the launcher's copy of the ASI can never save over us.
         Logger::EnableConsole();
         Settings::ClaimOwnership();
 
@@ -608,7 +608,7 @@ namespace trinity::hooks
         g_commandList->Close();
         // Name it so DRED (DumpDred) can tell a fault in OUR overlay submit apart
         // from a Streamline / engine command list.
-        g_commandList->SetName(L"TrinityOverlayCmdList");
+        g_commandList->SetName(L"CDModMenuOverlayCmdList");
 
         // Fence so we never reset an allocator the GPU is still using.
         if (FAILED(g_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&g_fence))))
@@ -888,7 +888,7 @@ namespace trinity::hooks
             else
             {
                 g_initFailed = true;
-                LOG_ERR("Overlay init failed - Trinity is disabled for this session.");
+                LOG_ERR("Overlay init failed - CDModMenu is disabled for this session.");
             }
         }
 
@@ -1033,7 +1033,7 @@ namespace trinity::hooks
     // untouched - under DLSS-G the native present is Streamline's read-only frame.
     static HRESULT WINAPI hkPresent(IDXGISwapChain3* swapChain, UINT syncInterval, UINT flags)
     {
-        trinity::game::World::TickSpeed();
+        cdmm::game::World::TickSpeed();
         const bool drew = RenderOverlay(swapChain, !g_wrapperActive);
         const HRESULT hr = oPresent(swapChain, syncInterval, flags);
         PostPresentDeviceCheck(drew);
@@ -1355,7 +1355,7 @@ namespace trinity::hooks
         WNDCLASSEXW wc = { sizeof(wc) };
         wc.lpfnWndProc   = DefWindowProcW;
         wc.hInstance     = GetModuleHandleW(nullptr);
-        wc.lpszClassName = L"TrinityDummyWnd";
+        wc.lpszClassName = L"CDModMenuDummyWnd";
         RegisterClassExW(&wc);
 
         HWND hwnd = CreateWindowW(wc.lpszClassName, L"", WS_OVERLAPPEDWINDOW,

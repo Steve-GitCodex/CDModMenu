@@ -3,7 +3,7 @@
 #include <cstdint>
 
 // ---------------------------------------------------------------------------
-// Trinity - Crimson Desert game interface registry.
+// CDModMenu - Crimson Desert game interface registry.
 //
 // This is the ONLY place the mod encodes knowledge about the game binary.
 // Everything here is a *byte signature* or a *struct offset* rather than an
@@ -19,7 +19,7 @@
 // IDA (every signature here is a confirmed unique match).
 // ---------------------------------------------------------------------------
 
-namespace trinity::game
+namespace cdmm::game
 {
     // Any pointer below this is treated as bogus (unmapped / small-int garbage).
     inline constexpr uintptr_t kMinPointer = 0x10000000;
@@ -169,7 +169,7 @@ namespace trinity::game
     // Resolving it fresh each tick yields an always-current player with no
     // stale cache - a body transition (mount/transform) reallocates the
     // character, but the next resolve simply returns the new one. See the
-    // trinity-engine-architecture notes for the full derivation.
+    // cdmm-engine-architecture notes for the full derivation.
     //
     // The manager is read as `manager = *(*G)` from ~30 sites, each of which
     // then passes it as ARG1 to one of the char-manager API functions.
@@ -193,7 +193,7 @@ namespace trinity::game
     //
     // CAUTION: the same API family is also called with two SIBLING globals
     // (0x61830D0 / 0x61830D8 in the current dump) - the client/server realm
-    // split, see the trinity-engine-architecture notes. Do NOT loosen these
+    // split, see the cdmm-engine-architecture notes. Do NOT loosen these
     // into "any global passed to the char-manager API": that also matches the
     // wrong realm's manager, which resolves fine and then fails silently. Keep
     // every anchor tied to a specific call site.
@@ -374,7 +374,7 @@ namespace trinity::game
     // The world map fast-travels through sub_505140(ignored, sceneId, nodeIndex)
     // (IDB 0x505140): a normal, server-blessed travel that streams properly (the
     // only reliable long-range teleport - every memory-write approach desyncs the
-    // Havok body; see trinity-open-questions). The first arg is unused (it feeds
+    // Havok body; see cdmm-open-questions). The first arg is unused (it feeds
     // sub_5019D0, which pulls the travel manager from a global and ignores it),
     // so we pass nullptr. It validates nodeIndex < nodeCount then triggers travel.
     //   char sub_505140(void* /*ignored*/, int sceneId, unsigned nodeIndex)
@@ -1457,7 +1457,7 @@ namespace trinity::game
     // cache is seeded (unscaled) the first time a key is seen - and because the
     // save-loader drives these SAME setters at login, every relationship is
     // pre-seeded there, so the first in-game gift/feed is already scaled and a
-    // loaded save is never re-scaled. See the trinity-friendly-system notes.
+    // loaded save is never re-scaled. See the cdmm-friendly-system notes.
     inline constexpr const char* kSig_FriendlySetNpc =
         "49 89 E3 53 55 56 57 41 56 48 83 EC 60 48 89 D7 48 8D 69 18 "
         "0F B7 42 04 66 41 89 43 08";

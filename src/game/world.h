@@ -1,6 +1,6 @@
 #pragma once
 
-namespace trinity::game
+namespace cdmm::game
 {
     // World features: Game Speed (a global time-dilation control built on the
     // engine's fixed-timestep override) and Time of Day (freeze / advance the

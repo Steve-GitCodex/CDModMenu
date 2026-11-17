@@ -5,7 +5,7 @@ static HMODULE g_module = nullptr;
 
 static DWORD WINAPI MainThread(LPVOID)
 {
-    trinity::Mod::Get().Initialize(g_module);
+    cdmm::Mod::Get().Initialize(g_module);
     return 0;
 }
 
@@ -21,7 +21,7 @@ BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID)
         break;
 
     case DLL_PROCESS_DETACH:
-        trinity::Mod::Get().Shutdown();
+        cdmm::Mod::Get().Shutdown();
         break;
     }
     return TRUE;

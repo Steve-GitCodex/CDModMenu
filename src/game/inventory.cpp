@@ -21,7 +21,7 @@
 #include "../core/text.h"
 #include "../core/state.h"
 
-namespace trinity::game
+namespace cdmm::game
 {
     using mem::Read64;
     using mem::Read32;

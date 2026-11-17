@@ -11,7 +11,7 @@
 #include "../mem/hooks.h"
 #include "../core/state.h"
 
-namespace trinity::game
+namespace cdmm::game
 {
     using mem::Read16;
     using mem::Read32;

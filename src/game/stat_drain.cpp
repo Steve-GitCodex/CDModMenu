@@ -7,7 +7,7 @@
 #include "offsets.h"
 #include "../mem/safe_memory.h"
 
-namespace trinity::game::StatTuning::Drain
+namespace cdmm::game::StatTuning::Drain
 {
     using mem::Read64;
     using mem::Write64;

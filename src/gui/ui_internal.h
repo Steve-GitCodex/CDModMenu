@@ -5,7 +5,7 @@
 
 #include <imgui.h>
 
-namespace trinity::ui
+namespace cdmm::ui
 {
     // --- Theme (Crimson Desert: deep reds on near-black) ---------------------
     namespace theme

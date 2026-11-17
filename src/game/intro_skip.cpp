@@ -14,7 +14,7 @@
 
 #pragma comment(lib, "mfuuid.lib")
 
-namespace trinity::game::IntroSkip
+namespace cdmm::game::IntroSkip
 {
     namespace
     {

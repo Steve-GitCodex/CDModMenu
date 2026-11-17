@@ -27,11 +27,11 @@
 //
 // See equipment.h for what is durable (add/clear) and what is live-only (unlock).
 
-namespace trinity::game
+namespace cdmm::game
 {
     namespace
     {
-        using namespace trinity::mem;
+        using namespace cdmm::mem;
 
         // The equipped-item effect refresh (see offsets.h): a socket edit updates
         // the record but not the derived effect structure, so we mark the state

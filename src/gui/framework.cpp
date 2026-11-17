@@ -18,7 +18,7 @@
 #include "../core/version.h"
 #include "../hooks/xinput_hook.h"
 
-namespace trinity::ui
+namespace cdmm::ui
 {
     // --- Shared state (declared in ui_internal.h) -----------------------------
     Nav      g_nav;
@@ -556,7 +556,7 @@ namespace trinity::ui
             ms.animY = -1.0f;
         }
 
-        // Brand bar: gradient, TRINITY left, version right.
+        // Brand bar: gradient, CDMODMENU left, version right.
         const float brandH = 46.0f * s;
         dl->AddRectFilledMultiColor(
             ImVec2(g_x, g_y), ImVec2(g_x + g_width, g_y + brandH),

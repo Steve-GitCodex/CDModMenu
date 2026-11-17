@@ -6,7 +6,7 @@
 // Declared in imgui_impl_win32.h.
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
 
-namespace trinity::input
+namespace cdmm::input
 {
     static WNDPROC g_originalWndProc = nullptr;
     static HWND    g_hwnd = nullptr;

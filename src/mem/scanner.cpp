@@ -4,7 +4,7 @@
 
 #include "../core/logger.h"
 
-namespace trinity::mem
+namespace cdmm::mem
 {
     const ModuleRegion& GameModule()
     {

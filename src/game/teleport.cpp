@@ -28,7 +28,7 @@
 #include "../core/logger.h"
 #include "../core/state.h"
 
-namespace trinity::game
+namespace cdmm::game
 {
     using mem::ReadPtr;
     using mem::Read32;

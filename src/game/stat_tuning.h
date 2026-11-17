@@ -5,7 +5,7 @@
 
 #include "../core/state.h"
 
-namespace trinity::game::StatTuning
+namespace cdmm::game::StatTuning
 {
     enum Kind { Health = 0, Stamina = 1, Spirit = 2 };
 

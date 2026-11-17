@@ -5,12 +5,12 @@ set(MOD_NAME "CDModMenu" CACHE STRING "Output name of the mod (.asi, .ini, conso
 string(TOUPPER "${MOD_NAME}" MOD_NAME_UPPER)
 
 # ---------------------------------------------------------------------------
-# Trinity - internal ImGui mod menu for Crimson Desert (DirectX 12).
-# Builds a Trinity.asi that an ASI loader injects into the game process.
+# CDModMenu - internal ImGui mod menu for Crimson Desert (DirectX 12).
+# Builds a CDModMenu.asi that an ASI loader injects into the game process.
 # ---------------------------------------------------------------------------
 
 if(NOT WIN32)
-    message(FATAL_ERROR "Trinity targets Windows only.")
+    message(FATAL_ERROR "CDModMenu targets Windows only.")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
@@ -49,8 +49,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(minhook)
 
-# --- Trinity ASI -----------------------------------------------------------
-add_library(Trinity SHARED
+# --- CDModMenu ASI -----------------------------------------------------------
+add_library(CDModMenu SHARED
     src/dllmain.cpp
     src/core/mod.cpp
     src/core/settings.cpp
@@ -76,14 +76,14 @@ add_library(Trinity SHARED
     src/game/stat_tuning.cpp
     src/game/intro_skip.cpp
     src/game/stat_drain.cpp
-    src/Trinity.rc               # VERSIONINFO -> legitimate PE metadata for AV/ML scoring
+    src/CDModMenu.rc               # VERSIONINFO -> legitimate PE metadata for AV/ML scoring
 )
 
-target_include_directories(Trinity PRIVATE src)
+target_include_directories(CDModMenu PRIVATE src)
 # Resolve #include "core/version.h" from the .rc via an explicit /I for the RC compiler.
-target_include_directories(Trinity PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(Trinity PRIVATE imgui minhook d3d12 dxgi dwmapi imm32 xinput9_1_0)
-target_compile_definitions(Trinity PRIVATE
+target_include_directories(CDModMenu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(CDModMenu PRIVATE imgui minhook d3d12 dxgi dwmapi imm32 xinput9_1_0)
+target_compile_definitions(CDModMenu PRIVATE
     MOD_NAME="${MOD_NAME}"
     MOD_NAME_UPPER="${MOD_NAME_UPPER}"
     MOD_FILENAME="${MOD_NAME}.asi"
@@ -94,7 +94,7 @@ target_compile_definitions(Trinity PRIVATE
 )
 
 # .asi is just a DLL with a different extension; strip the lib prefix too.
-set_target_properties(Trinity PROPERTIES
+set_target_properties(CDModMenu PROPERTIES
     PREFIX ""
     SUFFIX ".asi"
     OUTPUT_NAME "${MOD_NAME}"
@@ -106,7 +106,7 @@ set_target_properties(Trinity PROPERTIES
 # code signature these markers materially improve AV/ML reputation scoring; they
 # cost nothing at runtime for a mod of this size.
 if(MSVC)
-    target_compile_options(Trinity PRIVATE /guard:cf)
-    target_link_options(Trinity PRIVATE
+    target_compile_options(CDModMenu PRIVATE /guard:cf)
+    target_link_options(CDModMenu PRIVATE
         /DYNAMICBASE /HIGHENTROPYVA /NXCOMPAT /guard:cf)
 endif()

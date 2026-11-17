@@ -12,7 +12,7 @@
 
 #include "../core/state.h"
 
-namespace trinity::ui
+namespace cdmm::ui
 {
     static ImU32 WithAlpha(ImU32 col, float a)
     {

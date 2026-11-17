@@ -4,7 +4,7 @@
 #include <cstring>
 #include <iterator>
 
-namespace trinity::game::StorageSlots
+namespace cdmm::game::StorageSlots
 {
     int Step()
     {

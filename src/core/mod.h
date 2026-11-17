@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 
-namespace trinity
+namespace cdmm
 {
     // Top-level coordinator: brings up MinHook + the render/input hooks, and
     // tears them back down on unload.

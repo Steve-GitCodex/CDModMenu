@@ -13,10 +13,10 @@
 // for textures - a plaintext 128-byte DDS header followed by an LZ4-compressed
 // mip payload (comp 1). We only ever pull a handful of UI atlases at startup,
 // so this favours clarity over speed. (Format reverse-engineered from the
-// engine's own pamt parser; see the Trinity icon-pipeline notes.)
+// engine's own pamt parser; see the CDModMenu icon-pipeline notes.)
 // ---------------------------------------------------------------------------
 
-namespace trinity::game::pak
+namespace cdmm::game::pak
 {
     // Reads one file out of chunk `chunk` (e.g. 12 -> "0012") by its directory
     // path (forward-slash, e.g. "ui/texture") and file name. Returns the fully

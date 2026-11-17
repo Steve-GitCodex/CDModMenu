@@ -9,7 +9,7 @@
 
 #include "../core/logger.h"
 
-namespace trinity::game::pak
+namespace cdmm::game::pak
 {
     namespace
     {

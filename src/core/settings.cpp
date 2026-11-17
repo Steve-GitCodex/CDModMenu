@@ -10,13 +10,13 @@
 #include "mod.h"
 #include "state.h"
 
-namespace trinity
+namespace cdmm
 {
     // Set once by ClaimOwnership() in the process that presents the game. See
-    // settings.h - only that process may write Trinity.ini.
+    // settings.h - only that process may write CDModMenu.ini.
     static bool g_owner = false;
 
-    // Trinity.ini lives next to Trinity.asi so the whole install stays one
+    // CDModMenu.ini lives next to CDModMenu.asi so the whole install stays one
     // folder that can be copied or deleted as a unit. `suffix` appends to the
     // file name for the temp file Save() writes through.
     static bool IniPath(char* buf, size_t cap, const char* suffix = "")
@@ -214,7 +214,7 @@ namespace trinity
 
         // Write through a temp file and swap it in, so an interrupted save (the
         // shutdown one runs while the process is already tearing down) can never
-        // leave a truncated Trinity.ini behind - the old file survives instead.
+        // leave a truncated CDModMenu.ini behind - the old file survives instead.
         const State& st = State::Get();
         FILE* f = fopen(tmp, "w");
         if (!f)
@@ -224,7 +224,7 @@ namespace trinity
         }
 
         fprintf(f,
-                "; Trinity feature settings - managed from the in-game SYSTEM tab.\n"
+                "; CDModMenu feature settings - managed from the in-game SYSTEM tab.\n"
                 "; *KeyVk = Win32 virtual-key code; *PadMask = XInput button mask.\n"
                 "openKeyVk=%d\n"
                 "openPadMask=%u\n"

@@ -15,7 +15,7 @@
 #include "../core/state.h"
 #include "stat_tuning.h"
 
-namespace trinity::game
+namespace cdmm::game
 {
     using mem::Read64;
     using mem::Read32;
@@ -39,7 +39,7 @@ namespace trinity::game
         // cached: a body transition (mount / transform / character swap)
         // reallocates a character, but the next resolve simply rebuilds the set,
         // so there is no stale-pointer churn to track. See offsets.h
-        // (kCharMgrAnchors) and the trinity-engine-architecture notes.
+        // (kCharMgrAnchors) and the cdmm-engine-architecture notes.
         //
         // Resolved address of the qword_6181090 slot; the manager is
         // *(*g_charMgrGlobal). Zero if no anchor resolved, in which case every

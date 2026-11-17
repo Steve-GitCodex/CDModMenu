@@ -1,6 +1,6 @@
 #pragma once
 
-namespace trinity
+namespace cdmm
 {
     // Sentinel bits (outside the real XInput wButtons range) that let the two
     // analog triggers act as held "buttons" in a pad mask - used by the Free
@@ -25,7 +25,7 @@ namespace trinity
 
         // Menu open/close binding (framework.cpp PollMenuToggle /
         // PollToggleCombo), rebindable from the SYSTEM tab's Keybinds submenu
-        // and persisted in Trinity.ini. openKeyVk is a Win32 virtual-key code
+        // and persisted in CDModMenu.ini. openKeyVk is a Win32 virtual-key code
         // (default VK_INSERT); openPadMask is an XInput button mask that must
         // be held in full - a single button or a combo (default LB + D-Pad
         // Down).
@@ -82,7 +82,7 @@ namespace trinity
         // and aerial attacks are untouched (no hover clamp). The keys are Win32
         // virtual-key codes; defaults Caps Lock (up) and Ctrl (down). Rebindable
         // (with openKeyVk/openPadMask) from the SYSTEM tab's Keybinds submenu
-        // and persisted in Trinity.ini regardless of Auto Save.
+        // and persisted in CDModMenu.ini regardless of Auto Save.
         bool  freeFlight   = false;
         float flightSpeed  = 8.0f;
         int   flyUpKeyVk   = 0x14; // VK_CAPITAL (Caps Lock)
@@ -143,7 +143,7 @@ namespace trinity
         float turboMult = 8.0f;
 
         // Persistence (settings.cpp). While on, every feature change is
-        // written to Trinity.ini and restored on the next launch. The flag
+        // written to CDModMenu.ini and restored on the next launch. The flag
         // itself always persists so the preference survives sessions.
         bool autoSave = false;
 

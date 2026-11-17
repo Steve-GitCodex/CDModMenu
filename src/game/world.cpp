@@ -14,7 +14,7 @@
 #include "../core/logger.h"
 #include "../core/state.h"
 
-namespace trinity::game
+namespace cdmm::game
 {
     using mem::Write8;
     using mem::Write32;

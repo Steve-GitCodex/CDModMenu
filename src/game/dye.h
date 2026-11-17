@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace trinity::game
+namespace cdmm::game
 {
     // Armor dye / material / repair-condition editor - the dyehouse, from the
     // menu, for whatever is currently equipped. See the dye section of

@@ -6,7 +6,7 @@
 
 #pragma comment(lib, "xinput9_1_0.lib")
 
-namespace trinity::hooks
+namespace cdmm::hooks
 {
     using XInputGetState_t = DWORD (WINAPI*)(DWORD, XINPUT_STATE*);
 
@@ -40,7 +40,7 @@ namespace trinity::hooks
 
     // A distinct detour per module so each can call the matching trampoline
     // (MinHook can't tell us which target a shared detour was invoked for).
-    #define TRINITY_XINPUT_DETOUR(NAME, ORIG)                              \
+    #define CDMODMENU_XINPUT_DETOUR(NAME, ORIG)                              \
         static DWORD WINAPI NAME(DWORD i, XINPUT_STATE* s)                 \
         {                                                                  \
             const DWORD r = ORIG(i, s);                                    \
@@ -48,10 +48,10 @@ namespace trinity::hooks
                 Neutralize(s);                                             \
             return r;                                                      \
         }
-    TRINITY_XINPUT_DETOUR(hk_1_4,   o_1_4)
-    TRINITY_XINPUT_DETOUR(hk_1_3,   o_1_3)
-    TRINITY_XINPUT_DETOUR(hk_9_1_0, o_9_1_0)
-    #undef TRINITY_XINPUT_DETOUR
+    CDMODMENU_XINPUT_DETOUR(hk_1_4,   o_1_4)
+    CDMODMENU_XINPUT_DETOUR(hk_1_3,   o_1_3)
+    CDMODMENU_XINPUT_DETOUR(hk_9_1_0, o_9_1_0)
+    #undef CDMODMENU_XINPUT_DETOUR
 
     struct Target
     {

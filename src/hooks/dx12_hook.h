@@ -1,6 +1,6 @@
 #pragma once
 
-namespace trinity::hooks
+namespace cdmm::hooks
 {
     // Grabs the DX12 present/queue vtable pointers from a throwaway device and
     // detours them with MinHook. Must be called after MH_Initialize().

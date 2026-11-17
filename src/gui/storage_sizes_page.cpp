@@ -10,7 +10,7 @@
 #include "../game/inventory.h"
 #include "../game/storage_slots.h"
 
-namespace trinity::gui
+namespace cdmm::gui
 {
     namespace
     {

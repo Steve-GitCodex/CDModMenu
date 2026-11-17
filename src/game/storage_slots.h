@@ -1,7 +1,7 @@
 #pragma once
 #include "../core/state.h"
 
-namespace trinity::game::StorageSlots
+namespace cdmm::game::StorageSlots
 {
     inline constexpr int kSteps[] = {1, 10, 100, 1000};
     inline constexpr const char* kStepNames[] = {"1", "10", "100", "1000"};

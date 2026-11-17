@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-namespace trinity::game
+namespace cdmm::game
 {
     // Everything related to teleporting: live position tracking, jumping to
     // an arbitrary point, and saved presets. See offsets.h (kSig_MoveUpdate)

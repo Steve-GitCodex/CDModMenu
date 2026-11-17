@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include <Xinput.h>
 
-namespace trinity::hooks
+namespace cdmm::hooks
 {
     // Detours XInputGetState so the pad is neutralised for the GAME while the
     // menu is open - stops nav buttons (A/B, d-pad, RB+X) leaking through. The

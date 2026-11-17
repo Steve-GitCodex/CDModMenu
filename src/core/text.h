@@ -1,7 +1,7 @@
 #pragma once
 #include <cctype>
 
-namespace trinity
+namespace cdmm
 {
     // Case-insensitive substring test (`needle` somewhere in `hay`). Used
     // both for menu search-filter rows and for classifying item keys by

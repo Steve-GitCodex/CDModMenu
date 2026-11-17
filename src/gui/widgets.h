@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace trinity::ui
+namespace cdmm::ui
 {
     // Reusable menu rows. Every widget draws one 36px row between Begin() and
     // End() (framework.h) and returns true when it was activated / changed

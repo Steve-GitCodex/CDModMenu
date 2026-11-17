@@ -1,6 +1,6 @@
 #pragma once
 
-namespace trinity::gui
+namespace cdmm::gui
 {
     // Called every frame between ImGui::NewFrame() and ImGui::Render().
     void Render();

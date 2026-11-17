@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace trinity::game
+namespace cdmm::game
 {
     // Inventory browser / editor. See offsets.h (kSig_InvCoreGlobal,
     // kSig_InvGetItemQty, kSig_InvGetHolder, kStr_ItemInfoTable) for the RE

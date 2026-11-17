@@ -1,6 +1,6 @@
 #pragma once
 
-namespace trinity::gui
+namespace cdmm::gui
 {
     void RenderStorageSizes();
 }

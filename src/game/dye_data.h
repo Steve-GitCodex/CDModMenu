@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace trinity::game
+namespace cdmm::game
 {
     // --- The dyehouse's preset palette -----------------------------------
     // One family per dyecolorgroupinfo row, hue-ordered for the menu.

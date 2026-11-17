@@ -8,7 +8,7 @@
 #include "../core/state.h"
 #include "../game/player.h"
 
-namespace trinity::gui
+namespace cdmm::gui
 {
     namespace
     {

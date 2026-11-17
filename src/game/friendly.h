@@ -1,13 +1,13 @@
 #pragma once
 
-namespace trinity::game
+namespace cdmm::game
 {
     // Trust Multiplier - scales the trust ("Friendly" / 친밀도) you GAIN when
     // gifting NPCs or feeding/taming animals and mounts.
     //
     // How it works, and why it survives game updates (located by byte
     // signature, never a baked address; see the Friendly section of offsets.h
-    // and the trinity-friendly-system notes for the full RE):
+    // and the cdmm-friendly-system notes for the full RE):
     //  - "Friendly" is the engine's single trust value behind both mechanics -
     //    gifting an NPC and feeding a wild animal both raise it, and it is the
     //    gauge that fills to tame a mount. It is a 0..100 value; reaching 100

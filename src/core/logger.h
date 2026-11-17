@@ -7,7 +7,7 @@
 #include <mutex>
 #include <string>
 
-namespace trinity
+namespace cdmm
 {
     // Console logger. The console is created lazily (only the process that
     // actually renders the game calls EnableConsole), so the launcher process
@@ -111,7 +111,7 @@ namespace trinity
     };
 }
 
-#define LOG(...)      ::trinity::Logger::Log(::trinity::Logger::Info,  __VA_ARGS__)
-#define LOG_OK(...)   ::trinity::Logger::Log(::trinity::Logger::Good,  __VA_ARGS__)
-#define LOG_WARN(...) ::trinity::Logger::Log(::trinity::Logger::Warn,  __VA_ARGS__)
-#define LOG_ERR(...)  ::trinity::Logger::Log(::trinity::Logger::Error, __VA_ARGS__)
+#define LOG(...)      ::cdmm::Logger::Log(::cdmm::Logger::Info,  __VA_ARGS__)
+#define LOG_OK(...)   ::cdmm::Logger::Log(::cdmm::Logger::Good,  __VA_ARGS__)
+#define LOG_WARN(...) ::cdmm::Logger::Log(::cdmm::Logger::Warn,  __VA_ARGS__)
+#define LOG_ERR(...)  ::cdmm::Logger::Log(::cdmm::Logger::Error, __VA_ARGS__)

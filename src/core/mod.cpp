@@ -14,7 +14,7 @@
 #include "../game/friendly.h"
 #include "../game/intro_skip.h"
 
-namespace trinity
+namespace cdmm
 {
     void Mod::Initialize(HMODULE module)
     {
@@ -26,7 +26,7 @@ namespace trinity
         // that actually presents the game gets one. Early logs buffer until then.
         LOG(MOD_NAME " v%s initializing (built %s %s).", MOD_VERSION, __DATE__, __TIME__);
 
-        // Restore last session's feature settings (Trinity.ini) before the
+        // Restore last session's feature settings (CDModMenu.ini) before the
         // feature hooks install, so restored toggles apply from frame one.
         Settings::Load();
 

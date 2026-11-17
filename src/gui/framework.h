@@ -1,6 +1,6 @@
 #pragma once
 
-namespace trinity::ui
+namespace cdmm::ui
 {
     // Menu shell: a tabbed, list-based menu custom-drawn on the ImGui draw
     // list - no stock ImGui widgets - navigable with keyboard, mouse

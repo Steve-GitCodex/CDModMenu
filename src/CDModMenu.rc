@@ -1,4 +1,4 @@
-// Windows version resource for Trinity.asi.
+// Windows version resource for CDModMenu.asi.
 //
 // A PE that carries proper VERSIONINFO (company / product / version) scores as
 // far more legitimate to AV ML classifiers than a metadata-less binary. The
@@ -10,7 +10,7 @@
 #include <windows.h>
 #include "core/version.h"
 
-// IDI_ICON1 ICON "Trinity.ico"
+// IDI_ICON1 ICON "CDModMenu.ico"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION    MOD_VERSION_MAJOR,MOD_VERSION_MINOR,MOD_VERSION_PATCH,0

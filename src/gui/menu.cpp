@@ -25,7 +25,7 @@
 #include "storage_sizes_page.h"
 #include "stat_tuning_page.h"
 
-namespace trinity::gui
+namespace cdmm::gui
 {
     // Top-level sections. Always visible as the tab strip; Q/E/Tab or LB/RB
     // jump between them from anywhere, so nothing is ever more than a press
@@ -1634,7 +1634,7 @@ namespace trinity::gui
         // Each action is one row with its keyboard bind and controller bind side
         // by side under the two column titles. Left/Right pick the column, Enter
         // rebinds it (then press the key/button - Esc cancels), Del resets it.
-        // Every bind here persists in Trinity.ini regardless of Auto Save.
+        // Every bind here persists in CDModMenu.ini regardless of Auto Save.
         ui::BindHeader();
 
         // Per-row focus column (0 = keyboard, 1 = controller), remembered across
@@ -1673,7 +1673,7 @@ namespace trinity::gui
         State& st = State::Get();
         ui::Begin();
 
-        // `save` = write Trinity.ini this frame. The Auto Save flag flip is
+        // `save` = write CDModMenu.ini this frame. The Auto Save flag flip is
         // always written (so turning it OFF is remembered); everything else
         // only writes while Auto Save is on.
         bool save = false;

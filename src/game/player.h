@@ -1,6 +1,6 @@
 #pragma once
 
-namespace trinity::game
+namespace cdmm::game
 {
     // Player stat features (God Mode, Infinite Stamina, Infinite Spirit) and
     // the incoming/outgoing damage multipliers.

@@ -13,7 +13,7 @@
 #include "../core/logger.h"
 #include "../game/pak.h"
 
-namespace trinity::ui
+namespace cdmm::ui
 {
     namespace
     {

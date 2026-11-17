@@ -1,6 +1,6 @@
 #pragma once
 
-namespace trinity::game::IntroSkip
+namespace cdmm::game::IntroSkip
 {
     void Install();
 }

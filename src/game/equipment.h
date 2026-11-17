@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace trinity::game
+namespace cdmm::game
 {
     // Abyss-Gear socket editor - the equipment editor, from the menu, for
     // whatever is currently equipped. See the abyss-gear section of offsets.h

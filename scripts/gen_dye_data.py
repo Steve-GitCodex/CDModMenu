@@ -201,7 +201,7 @@ def main():
         w("// partprefabdyeslotinfo.pabgb (see the script header for how to\n")
         w("// regenerate after a game patch).\n")
         w("#pragma once\n\n#include <cstdint>\n\n")
-        w("namespace trinity::game\n{\n")
+        w("namespace cdmm::game\n{\n")
         w("    // --- The dyehouse's preset palette -----------------------------------\n")
         w("    // One family per dyecolorgroupinfo row, hue-ordered for the menu.\n")
         w("    // shades[0..8] are the family's 9 neutral tones; shades[9..108] are\n")

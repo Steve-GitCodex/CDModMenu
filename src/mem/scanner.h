@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace trinity::mem
+namespace cdmm::mem
 {
     // A contiguous mapped module image (base + SizeOfImage).
     struct ModuleRegion

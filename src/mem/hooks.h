@@ -8,7 +8,7 @@
 #include "scanner.h"
 #include "../core/logger.h"
 
-namespace trinity::mem
+namespace cdmm::mem
 {
     // Finds `sig` (warning if it isn't uniquely matched, up to `maxMatches`
     // probes) and installs a MinHook detour at the resolved address - the

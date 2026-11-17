@@ -31,11 +31,11 @@
 // Worn gear has no inventory slot to mirror onto - the equip table is where a
 // worn item lives. See the persistence note in offsets.h.
 
-namespace trinity::game
+namespace cdmm::game
 {
     namespace
     {
-        using namespace trinity::mem;
+        using namespace cdmm::mem;
 
         // --- Resolved engine entry points --------------------------------
         using EquipBatch_t    = void* (__fastcall*)(void*, void*, void*, void*);

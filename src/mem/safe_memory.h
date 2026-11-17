@@ -5,7 +5,7 @@
 
 #include "../game/offsets.h"
 
-namespace trinity::mem
+namespace cdmm::mem
 {
     // Guarded (SEH) memory access for reading/writing game-process memory
     // whose validity we can't otherwise prove - a pointer chain through

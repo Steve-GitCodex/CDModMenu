@@ -6,9 +6,9 @@ struct ID3D12Device;
 struct ID3D12DescriptorHeap;
 struct ID3D12GraphicsCommandList;
 
-namespace trinity::ui
+namespace cdmm::ui
 {
-    // Logical icons Trinity draws, sourced from the game's own UI atlases
+    // Logical icons CDModMenu draws, sourced from the game's own UI atlases
     // (loaded at startup via the pak reader). Tab glyphs come from
     // cd_icon_common_00; keyboard/controller prompt glyphs from the two
     // cd_icon_keyguide_* atlases. See the icon-pipeline notes for provenance.

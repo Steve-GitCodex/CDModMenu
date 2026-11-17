@@ -1,7 +1,7 @@
-# Trinity — Internal Mod Menu for Crimson Desert
+# CDModMenu — Internal Mod Menu for Crimson Desert
 
 An internal mod menu for **Crimson Desert** (DirectX 12). Builds to
-`Trinity.asi` and is injected by an ASI loader. Renders a custom GTA-style list
+`CDModMenu.asi` and is injected by an ASI loader. Renders a custom GTA-style list
 menu (no stock ImGui widgets) over the game, navigable with keyboard, mouse and
 controller.
 
@@ -26,14 +26,14 @@ placeholders.
 ## Architecture
 
 ```
-Trinity.asi (DLL)
+CDModMenu.asi (DLL)
 ├── dllmain.cpp            DllMain → spawns init thread off the loader lock
 ├── core/mod.*             Coordinator: MinHook init + hook install/teardown
 ├── core/settings.*        Persisted settings + keybinds
 ├── core/logger.h          Colored console log (opened only by the process
 │                          that renders; the launcher stays silent)
 ├── core/state.h           Shared toggles (menu open, feature flags)
-├── core/version.h         TRINITY_VERSION
+├── core/version.h         CDMODMENU_VERSION
 ├── mem/scanner.*          AOB signature scanner
 ├── mem/hooks.h            MinHook helpers
 ├── mem/safe_memory.h      Guarded reads/writes and pointer-chain walks
@@ -103,16 +103,16 @@ cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 cmake --build build --config Release
 ```
 
-Output: `build/Release/Trinity.asi`.
+Output: `build/Release/CDModMenu.asi`.
 
 ## Install / run
 
 1. Get an ASI loader (e.g. Ultimate ASI Loader). Ship its proxy DLL next to the
    game executable — pick an import the game actually loads (commonly
    `dinput8.dll`, `winmm.dll`, or `version.dll`).
-2. Drop `Trinity.asi` in the game folder (or the loader's `scripts/` /
+2. Drop `CDModMenu.asi` in the game folder (or the loader's `scripts/` /
    `plugins/` folder, depending on the loader).
-3. Launch the game. A **Trinity** console window opens alongside it.
+3. Launch the game. A **CDModMenu** console window opens alongside it.
 4. Press **INSERT** (or **LB + D-pad Down**) in-game to toggle the menu.
 
 ## Scripts
